@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import moment from 'moment';
 import { fetchVideoDetails } from '../actions/videoDetails';
 
-import { View, Text, StyleSheet, Image, TouchableHighlight } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableHighlight, Animated, Easing } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
   image: {
     height: 200,
     flex: 1,
+    backgroundColor:'#666666',
   },
   details: {
     flex: 1,
@@ -41,29 +42,54 @@ const styles = StyleSheet.create({
   }
 });
 
-const VideoItem = (props) => {
+const ANIMATION_DURATION = 800;
 
-  const { dispatch } = props;
-  const published = moment(props.published).fromNow();
+class VideoItem extends React.Component{
+  constructor() {
+    super();
 
-  return (
-    <TouchableHighlight onPress={()=> dispatch(fetchVideoDetails(props.vId)) }>
-      <View style={styles.container}>
-        <Image style={styles.image} source={{uri: props.image}} resizeMode={'cover'}/>
-        <View style={styles.wrapper}>
-          <Text style={styles.title}>{props.title}</Text>
-          <View style={styles.details}>
-            <View style={styles.channel}>
-              <Text>{props.channelTitle}</Text>
-            </View>
-            <View style={styles.channel}>
-              <Text style={styles.text_right}>{published}</Text>
+    this._animated = new Animated.Value(0);
+    this._animatedPos = new Animated.Value(250);
+  }
+
+  componentDidMount() {
+    Animated.timing(this._animated, {
+      toValue: 1,
+      duration: ANIMATION_DURATION,
+    }).start();
+
+    Animated.timing(this._animatedPos, {
+      toValue: 0,
+      duration: 600,
+      easing: Easing.inOut(Easing.quad)
+    }).start();
+  }
+
+  render() {
+    const { props } = this;
+    const { dispatch } = props;
+    const published = moment(props.published).fromNow();
+    return (
+      <TouchableHighlight onPress={()=> dispatch(fetchVideoDetails(props.vId)) }>
+        <Animated.View style={{opacity: this._animated, transform: [{translateY: this._animatedPos}]}}>
+          <View style={styles.container}>
+            <Image style={styles.image} source={{uri: props.image}} resizeMode={'cover'}/>
+            <View style={styles.wrapper}>
+              <Text style={styles.title}>{props.title}</Text>
+              <View style={styles.details}>
+                <View style={styles.channel}>
+                  <Text>{props.channelTitle}</Text>
+                </View>
+                <View style={styles.channel}>
+                  <Text style={styles.text_right}>{published}</Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </View>
-    </TouchableHighlight>
-  );
+        </Animated.View>
+      </TouchableHighlight>
+    );
+  }
 }
 
 VideoItem.propTypes = {
