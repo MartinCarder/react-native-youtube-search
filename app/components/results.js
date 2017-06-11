@@ -14,6 +14,8 @@ const Results = (props) => {
               title={item.snippet.title}
               image={item.snippet.thumbnails.high.url}
               vId={item.id.videoId}
+              published={item.snippet.publishedAt}
+              channelTitle={item.snippet.channelTitle}
             />
           )
         }}
